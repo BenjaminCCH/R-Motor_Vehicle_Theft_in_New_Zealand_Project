@@ -1,0 +1,447 @@
+---
+title: "Motor Vehicle Theft in New Zealand"
+author: "Name: Benjamin"
+date: "2026-01-25"
+output: pdf_document
+---
+***Research Question: What age group and geographic region are most commonly associated with motor vehicle theft and related offences in New Zealand, and how have the offender counts for these crimes evolved between 2019 and 2023 within these age group and geographic region?***
+
+## Introduction
+The recent surge in motor vehicle theft and related offences in New Zealand has become a significant concern, with media reports highlighting	a notable increase in such crimes (RNZ, 2024; The Post, 2023). These related offences include illegal use of motor vehicles, theft of vehicle parts or contents and the theft of items from within vehicles. This has led to increased costs for repairs, replacements and insurance premiums, as well as causing emotional distress for the car owner. The purpose of this research is to explore the trends and patterns associated with motor vehicle theft and related offences in New Zealand. By identifying the specific age group and geographic region most frequently involved, as well as examining how offender counts for these crimes have evolved between 2019 and 2023 within these age group and geographic region, this study aims to provide law enforcement agencies with valuable data or insights to develop more effective targeted prevention strategies. Ultimately, the goal is to enhance public safety and improve the quality of life for residents by reducing the occurrence of these crimes.
+
+## Methods
+A total of 60 monthly unique offenders (demographics) datasets were downloaded from the NZ Police website (New Zealand Police, 2024). To access these datasets, click on “District” and choose the desired month and year from the “12-month period ending” dropdown menu. Then, locate the Download icon at the bottom right corner of the section and select the “Data” option. This action will open a new Tableau window. In the tab section, click on “Full Data”, then select “Show Fields” and check “(All)” option. Finally, proceed to download. Since only one monthly dataset can be downloaded at a time, these 60 datasets, covering the period from January 2019 to December 2023, were downloaded manually, one by one. Once completed, the datasets were merged into a single dataset containing 2,759,421 observations and 22 variables. To focus on the specific crimes of interest, the dataset was filtered to include only observations with the ANZSOC subdivision "Motor Vehicle Theft and Related Offences," reducing it to 68,934 observations. From this filtered data, 5 key variables were selected and retained for analysis: ANZSOC subdivision, date (month and year), age group, police district, and offender count.
+
+Since this research focuses on the 5-year period from 2019 to 2023, the date variable was preprocessed to aggregate monthly data into yearly intervals. Then, the offender counts will be grouped by year, age group or police district to create new data frames, each containing the total number of offenders for that specific grouping. These data frames will be used for further analysis and visualization. To explore the data, two bar charts were generated: one to display the total offender counts across different age groups, and the other to show offender counts by police district. Bar charts were chosen for its effectiveness in illustrating categorical data, allowing for easy comparison of the offender counts across different age groups and police districts. To capture trends over time, three separate line charts were created, visualizing the total offender counts, total offender counts by age group and total offender counts by police district over the five-year period from 2019 to 2023. Line charts were chosen for their ability to effectively display time series data, making it easier to identify trends and patterns over multiple years.
+
+The types and roles of the 5 key variables are described as follows:  
+*1. ANZSOC subdivision*  
+Type: Independent Nominal Variable  
+Role: It is a part of the national statistical framework used to classify criminal behaviour in Australia and New Zealand. It includes various crime categories. For this analysis, motor theft and related offenses have been filtered and selected, allowing us to focus on this specific crime type and investigate how it varies across different years, age groups and police districts.
+
+*2. Year*  
+Type: Independent Nominal Variable  
+Role: It is used to track changes in offender counts over time, helping to understand whether the offender counts fluctuate across different years.
+
+*3. Age Group*  
+Type: Independent Nominal Variable  
+Role: It categorizes the offenders based on their age, allowing us to investigate whether certain age groups are more or less likely to be involved in motor vehicle theft and related offences.
+
+*4. Police District*  
+Type: Independent Nominal Variable  
+Role: It represents the geographic location where the offences occurred. By examining offender counts across different police districts, the areas with higher or lower offender rates of motor vehicle theft and related offences can be identified.
+
+*5. Offender Count*  
+Type: Dependent Discrete Variable  
+Role: It serves as the outcome variable in this analysis, representing the number of individuals involved in motor vehicle theft and related offences. Offender counts will be aggregated to compute the total offender count, based on year, age group or police district, depending on the specific analysis required.
+
+
+## Results
+
+```{r Loading the packages, include=FALSE} 
+library(purrr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(stringr)
+```
+
+
+```{r Generating the  directory and file paths, include=FALSE}
+# Defining the directory
+directory <- "D:/4. University of Canterbury (Copied to Ext. Hardisk on 9 Feb 2026)/UC Courses/2. Introduction to Data Science/IDS Assignment 2/a. Submit/Final Submission/Dataset"
+
+# Creating the file paths
+file_paths <- file.path(directory, c("2019.01.csv", "2019.02.csv", "2019.03.csv",
+                                      "2019.04.csv", "2019.05.csv", "2019.06.csv",
+                                      "2019.07.csv", "2019.08.csv", "2019.09.csv",
+                                      "2019.10.csv", "2019.11.csv", "2019.12.csv",
+                                      "2020.01.csv", "2020.02.csv", "2020.03.csv",
+                                      "2020.04.csv", "2020.05.csv", "2020.06.csv",
+                                      "2020.07.csv", "2020.08.csv", "2020.09.csv",
+                                      "2020.10.csv", "2020.11.csv", "2020.12.csv", 
+                                      "2021.01.csv", "2021.02.csv", "2021.03.csv",
+                                      "2021.04.csv", "2021.05.csv", "2021.06.csv",
+                                      "2021.07.csv", "2021.08.csv", "2021.09.csv",
+                                      "2021.10.csv", "2021.11.csv", "2021.12.csv",
+                                      "2022.01.csv", "2022.02.csv", "2022.03.csv",
+                                      "2022.04.csv", "2022.05.csv", "2022.06.csv",
+                                      "2022.07.csv", "2022.08.csv", "2022.09.csv",
+                                      "2022.10.csv", "2022.11.csv", "2022.12.csv", 
+                                      "2023.01.csv", "2023.02.csv", "2023.03.csv",
+                                      "2023.04.csv", "2023.05.csv", "2023.06.csv",
+                                      "2023.07.csv", "2023.08.csv", "2023.09.csv",
+                                      "2023.10.csv", "2023.11.csv", "2023.12.csv"))
+```
+
+
+```{r Reading and combining the files into a single dataframe, include=FALSE}
+main_data <- map_df(file_paths, read.csv)
+```
+
+
+```{r Retaining the relevant columns, include=FALSE}
+main_data <- main_data[,c("ANZSOC.Subdivision", "Year.Month", "Age.Group", 
+                          "Police.District", "Offender.Count")]
+```
+
+
+```{r Renaming the names of the columns, include=FALSE}
+main_data <- main_data %>% 
+  rename(anzsoc_subdivision = ANZSOC.Subdivision,
+         date = Year.Month,
+         age_group = Age.Group,
+         police_district = Police.District,
+         offender_count = Offender.Count)
+```
+
+
+```{r Renaming Counties/Manukau to Counties Manukau, include=FALSE}
+main_data <- main_data %>%
+  mutate(police_district = str_replace_all(police_district, "Counties/Manukau", "Counties Manukau"))
+```
+
+
+```{r Filter rows where ANZSOC.Subdivision is "Motor Vehicle Theft and Related Offences", include=FALSE}
+vehicle_theft <- filter(main_data, 
+                        anzsoc_subdivision == "Motor Vehicle Theft and Related Offences")
+```
+
+
+```{r Checking the number of missing values, include=FALSE}
+sum(is.na(vehicle_theft))
+```
+
+
+```{r line chart 1, fig.align='center', fig.width=5.0, fig.height=2.8, echo=FALSE}
+#Loading the packages
+library(purrr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+
+# Converting the date column to Date Format
+vehicle_theft_year <- vehicle_theft %>%
+  mutate(date = dmy(paste0("01-", date)))
+
+# Grouping by year and summarizing the sum
+vehicle_theft_year <- vehicle_theft_year %>%
+  group_by(year = year(date)) %>%
+  summarise(total_offender_count = sum(offender_count), .groups = 'drop')
+
+# Creating the line chart
+line_chart_year <- ggplot(vehicle_theft_year, aes(x = year, y = total_offender_count))
+line_chart_year + 
+  geom_line(colour = "black") + 
+  geom_text(aes(label = total_offender_count), vjust = -1.5, color = "brown", 
+            size = 3.5) + 
+  xlab("Year") + 
+  ylab("Offender Count") +
+  ggtitle("Figure 1: Total Offender Counts Involved in Motor Vehicle Theft\nand Related offences in New Zealand (2019-2023)") +
+  scale_y_continuous(breaks = seq(17000, 22000, by = 500), 
+                     limits = c(17000, 22000), expand = c(0, 0)) +
+  theme(
+    axis.title.x = element_text(size = 10, colour = "darkblue"),
+    axis.title.y = element_text(size = 10, colour = "darkblue"),
+    axis.text.x = element_text(size = 8),
+    axis.text.y = element_text(size = 8),
+    plot.title = element_text(size = 11, colour = "darkblue", hjust = 0.5),
+    panel.background = element_rect(fill = 'white'),
+    panel.grid.major = element_line(color = 'grey'),
+    panel.grid.major.x = element_blank()
+  )
+```
+In figure 1, the values represent the total offender counts grouped by year. The line chart shows a fluctuating trend in motor vehicle theft and related offences between 2019 and 2023. The total number of offenders decreased from 19,947 in 2019 to 17,864 in 2021. However, this downward trend reversed in 2022, with a sharp increase to 19,202. This upward trajectory continued in 2023, reaching a total of 21,365 offenders.
+\newpage
+
+
+```{r bar chart 1, fig.align='center', fig.width=5.5, fig.height=3.3, echo=FALSE}
+#Loading the packages
+library(purrr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+
+# Classifying and changing the name of age group  
+vehicle_theft_age <- vehicle_theft %>%
+  mutate(age_group_combined = case_when(
+    age_group %in% c("5-9") ~ "05-09",
+    age_group %in% c("10-14", "15-19") ~ "10-19",
+    age_group %in% c("20-24", "25-29") ~ "20-29",
+    age_group %in% c("30-34", "35-39") ~ "30-39",
+    age_group %in% c("40-44", "45-49") ~ "40-49",
+    age_group %in% c("50-54", "55-59") ~ "50-59",
+    age_group %in% c("60-64", "65-69") ~ "60-69",
+    age_group %in% c("70-74", "75-79") ~ "70-79",
+    age_group %in% c("80yearsorover") ~ "80+"
+  )) %>%
+  select(-age_group)
+
+
+# Removing rows where age group is "NotSpecified"
+vehicle_theft_age <- filter(vehicle_theft_age, 
+                        age_group_combined != "NotSpecified")
+
+
+# Grouping by age group and summarizing the sum
+vehicle_theft_age <- vehicle_theft_age%>%
+  group_by(age_group_combined) %>%
+  summarise(total_offender_count = sum(offender_count), .groups = 'drop')
+
+
+# Calculating the percentage of each age group
+vehicle_theft_age <- vehicle_theft_age %>%
+  mutate(percentage = round((total_offender_count / sum(total_offender_count)) * 100, 2))
+
+
+# Creating the bar chart
+bar_chart_age <- ggplot(vehicle_theft_age, aes(x = age_group_combined, 
+                                               y = total_offender_count, fill = age_group_combined)) 
+bar_chart_age +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = total_offender_count), 
+            vjust = -1.5, color = "brown", size = 3.2) +  
+  geom_text(aes(label = paste0("(", round(percentage, 2), "%)")), 
+            vjust = -0.2, color = "red", size = 3.1) +  
+  scale_y_continuous(breaks = seq(0, 55000, by = 10000), limits = c(0,55000), expand = c(0,0)) +
+  xlab("Age Group") +
+  ylab("Offender Count") +
+  ggtitle("Figure 2: Total Offender Counts Involved in Motor Vehicle Theft\nand Related offences by Age Group (2019-2023)") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  theme(
+    axis.title.x = element_text(size = 10, colour = "darkblue"),
+    axis.title.y = element_text(size = 10, colour = "darkblue"),
+    axis.text.x = element_text(size = 8),
+    axis.text.y = element_text(size = 8),
+    plot.title = element_text(size = 11, colour = "darkblue", hjust = 0.5)
+  )
+```
+In figure 2, the values represent the total offender counts grouped by age group. The bar chart reveals that the 10-19 age group accounts for 50.93% of all offenders, making the most represented group involved in motor vehicle theft and related offences between 2019 and 2023. This trend generally decreases as age increases, with the exception of the 05-09 age group, which represents a negligible 0.1% of the total offender population.
+\vspace{1em}
+
+```{r line chart 2, fig.align='center', fig.width=5.3, fig.height=2.5, echo=FALSE, message=FALSE, warning=FALSE}
+#Loading the packages
+library(purrr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(tidyr)
+library(knitr)
+library(kableExtra)
+
+# Converting the date column to Date format
+vehicle_theft_year_age <- vehicle_theft %>%
+  mutate(date = dmy(paste0("01-", date)))
+
+
+# Classifying and changing the name of age group  
+vehicle_theft_year_age <- vehicle_theft_year_age %>%
+  mutate(age_group_combined = case_when(
+    age_group %in% c("5-9") ~ "05-09",
+    age_group %in% c("10-14", "15-19") ~ "10-19",
+    age_group %in% c("20-24", "25-29") ~ "20-29",
+    age_group %in% c("30-34", "35-39") ~ "30-39",
+    age_group %in% c("40-44", "45-49") ~ "40-49",
+    age_group %in% c("50-54", "55-59") ~ "50-59",
+    age_group %in% c("60-64", "65-69") ~ "60-69",
+    age_group %in% c("70-74", "75-79") ~ "70-79",
+    age_group %in% c("80yearsorover") ~ "80+"
+  )) %>%
+  select(-age_group)
+
+
+# Removing rows where age group is "NotSpecified"
+vehicle_theft_year_age <- filter(vehicle_theft_year_age, 
+                            age_group_combined != "NotSpecified")
+
+
+# Grouping by year and age group, then summarizing it
+vehicle_theft_year_age <- vehicle_theft_year_age %>%
+  group_by(year = year(date), age_group_combined) %>%
+  summarise(total_offender_count = sum(offender_count), .groups = 'drop')
+
+
+# Creating the line chart
+line_chart_year_age <- ggplot(vehicle_theft_year_age, aes(x = year, y = total_offender_count, color = age_group_combined))
+  line_chart_year_age + geom_line() + geom_point(size = 3) +
+  xlab("Year") + 
+  ylab("Offender Count") +
+  ggtitle("Figure 3: Total Offender Counts Involved in Motor Vehicle Theft and\nRelated offences by Age Group and Year") +
+  scale_y_continuous(breaks = seq(0, 12000, by = 1000), 
+                     limits = c(0, 12000), expand = c(0, 0)) +
+  theme_minimal() + 
+  theme(axis.title.x = element_text(size = 10, colour = "darkblue"),
+        axis.title.y = element_text(size = 10, colour = "darkblue"),
+        axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8),
+        plot.title = element_text(size = 11, colour = "darkblue", hjust = 0.5),
+        legend.title = element_text(size = 11, colour = "darkblue"),
+        legend.text = element_text(size = 10, colour = "darkblue"),
+        legend.key.size = unit(0.5, "cm")) +
+  labs(color = "Age Group")
+```
+In figure 3, each point represents the total offender counts grouped by age group and year. The exact values for each point can be found in Table 1 in the appendix section. The line chart shows that the 05-09, 50-59, 60-69, 70-79, and 80+ age groups exhibit a relatively stable trend, with minimal variation in offender counts over the five-year period. However, the figure 3 cannot clearly distinguish between the trends for age-group 5-09, 60-69, 70-79, and 80+ due to their similiar offender counts and graph limitations (the exact values can be found in Table 1). The 20-29 age group shows a noticeable decline from 2019 to 2022, then remains steady from 2022 to 2023. In contrast, the 10-19, 30-39, and 40-49 age groups experience a decreasing trend from 2019 to 2021, followed by a marked upward trend from 2021 to 2023, with the 10-19 group experiencing a significantly sharper increase compared to the other two groups.
+
+
+```{r bar chart 2, fig.align='center', fig.width=8, fig.height=3.7, echo=FALSE}
+#Loading the packages
+library(purrr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+
+# Grouping by police district and summarizing the sum
+vehicle_theft_district <- vehicle_theft%>%
+  group_by(police_district) %>%
+  summarise(total_offender_count = sum(offender_count), .groups = 'drop')
+  
+  
+# Removing the rows where police district is "Not Specified (District)"
+vehicle_theft_district <- filter(vehicle_theft_district, 
+                                 police_district != "Not Specified (District)")
+
+
+# Calculate the percentage of each district
+vehicle_theft_district <- vehicle_theft_district %>%
+  mutate(percentage = round((total_offender_count / sum(total_offender_count)) * 100, 2))
+
+
+# Reorder the police_district variable by total_offender_count
+vehicle_theft_district$police_district <- factor(vehicle_theft_district$police_district, 
+                                                 levels = vehicle_theft_district$police_district[order(-vehicle_theft_district$total_offender_count)])
+
+
+# Creating the bar chart
+bar_chart_district <- ggplot(vehicle_theft_district, aes(x = reorder(police_district, -total_offender_count), y = total_offender_count, fill = police_district))
+bar_chart_district +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = total_offender_count), vjust = -1.5, color = "brown", 
+            size = 3.5) + 
+  geom_text(aes(label = paste0("(", percentage, "%)")), vjust = -0.2, color = "red", 
+            size = 3.2) +
+  scale_y_continuous(breaks = seq(0, 20000, by = 5000), limits = c(0,20000), expand = c(0,0)) +
+  xlab("Police District") +
+  ylab("Offender Count") +
+  ggtitle("Figure 4: Total Offender Counts Involved in Motor Vehicle Theft\nand Related offences by Police District (2019-2023)") +
+  theme_minimal() +
+  theme(
+    axis.title.x = element_text(size = 10, colour = "darkblue"),
+    axis.title.y = element_text(size = 10, colour = "darkblue"),
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(size = 8),
+    plot.title = element_text(size = 12, colour = "darkblue", hjust = 0.5),
+    legend.title = element_text(size = 10, colour = "darkblue"),
+    legend.text = element_text(size = 8, colour = "darkblue")) +
+  scale_fill_discrete(name = "Police District")
+```
+In figure 4, the values represent the total offender counts grouped by police district. The bar chart shows that the Counties Manukau police district has the highest offender count, accounting for 17.21% of all offenders across districts. This is followed by the Bay of Plenty with 11.6% and  Auckland City at 11%. In contrast, the Tasman Police District has the lowest number of offenders at 2.22%. It is closely followed by the Southern (4.09%) and Northland (4.59%) districts.
+
+
+```{r line chart 3, fig.align='center', fig.width=7, fig.height=4.0, echo=FALSE}
+
+#Loading the packages
+library(purrr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(tidyr)
+library(knitr)
+library(kableExtra)
+
+# Converting the date column to Date format
+vehicle_theft_year_district <- vehicle_theft %>%
+  mutate(date = dmy(paste0("01-", date)))
+
+
+# Removing te rows where police district is "Not Specified (District)"
+vehicle_theft_year_district <- filter(vehicle_theft_year_district, 
+                                 police_district != "Not Specified (District)")
+
+
+# Grouping by year and police district, then summarize the sum
+vehicle_theft_year_district <- vehicle_theft_year_district %>%
+  group_by(year = year(date), police_district) %>%
+  summarise(total_offender_count = sum(offender_count), .groups = 'drop')
+
+
+# Reorder the police_district variable manually
+vehicle_theft_year_district$police_district <- factor(vehicle_theft_year_district$police_district, 
+                                                      levels = c("Tasman", 
+                                                                 "Northland", 
+                                                                 "Southern", 
+                                                                 "Waikato",
+                                                                 "Central",
+                                                                 "Bay Of Plenty",
+                                                                 "Eastern",
+                                                                 "Waitemata",
+                                                                 "Wellington",
+                                                                 "Auckland City",
+                                                                 "Canterbury",
+                                                                 "Counties Manukau"))
+
+
+# Creating the line chart (facet)
+line_chart_year_district <- ggplot(vehicle_theft_year_district, aes(x = year, y = total_offender_count, color = police_district))
+line_chart_year_district + geom_line() + geom_point(size = 3) +
+  xlab("Year") + 
+  ylab("Offender Count") +
+  ggtitle("Figure 5: Total Offender Counts Involved in Motor Vehicle Theft and\nRelated offences by Police District and Year") +
+  scale_y_continuous(breaks = seq(0, 5000, by = 1000), 
+                     limits = c(0, 5000), expand = c(0, 0)) +
+  theme_minimal() + 
+  theme(axis.title.x = element_text(size = 10, colour = "darkblue"),
+        axis.title.y = element_text(size = 10, colour = "darkblue"),
+        axis.text.x = element_text(size = 8),
+        axis.text.y = element_text(size = 8),
+        plot.title = element_text(size = 12, colour = "darkblue", hjust = 0.5),
+        legend.position = "none",
+        panel.spacing = unit(1, "lines")) +
+  labs(color = "Police District") +
+  facet_wrap(~ police_district)
+```
+In figure 5, each point represents the total offender counts grouped by police district and year. The exact values for each point can be found in Table 2 in the appendix section. The line chart shows that 6 police districts – Tasman, Northland, Southern, Waikato, Central, Bay of Plenty – exhibited a relatively stable trend, with minimal variation in offender counts over the five-year period. In the Eastern police district, there was a significant upward trend from 2019 to 2021, followed by a decline from 2021 to 2023. In the Waitemata police district, offender counts increased from 2019 to 2020, then declined from 2020 to 2022, before experiencing a noticeable rise in 2023. The Wellington police district experienced a slight increase from 2019 to 2020, followed by a decrease in 2021, before experiencing a marked increase from 2022 to 2023. In Auckland City, the trend remained stable from 2019 to 2021, then rose noticeably from 2021 to 2022 before declining from 2022 to 2023. Both the Canterbury and Counties Manukau police districts showed a significant decrease in offender counts from 2019 to 2021, but experienced a noticeable increase from 2021 to 2023, with Counties Manukau in particular seeing a substantial rise in total offender counts during this period.
+
+## Discussion  
+*Age Group and Police District Analysis*  
+**The results from figures 2 and 4 indicate that the age group 10-19 and the Counties Manukau police district are most commonly associated with motor vehicle theft and related offences in New Zealand.** Young people in the 10-19 age group often engage in these crimes as thrill-seeking activities for excitement, or to gain social status among their peers. Their behavior is sometimes amplified by the desire to showcase their activities on social media platforms. Moreover, many young people in the 10-19 age group are either still in school or have limited employment opportunities. Economic hardships, especially when coupled with a lack of family support, may drive them to engage in criminal activities as a source of earning money. Therefore, these factors likely contribute this age group having highest offender count for motor vehicle theft and related offences compared to other age groups. Counties Manukau, being one of the most populous and rapidly growing districts in New Zealand, also has the highest offender count for motor vehicle theft and related offences compared to other districts. The correlation between high population density and increased motor vehicle theft and related offences is evident. The district’s urbanized nature, with its large number of vehicles parked on streets or in easily accessible parking locations, provides more opportunities for motor vehicle theft and related offences to occur.  
+
+*Trend Analysis*  
+**The 10-19 age group and the Counties Manukau police district shows a decline in total offender count for motor vehicle theft and related offences from 2019 to 2021, followed by an increase from 2021 to 2023 as shown in figures 3 and 5.** This pattern aligns with the overall trend in motor vehicle theft and related offences shown in figure 1. Similar trends are also observed in specific age groups (30-39, 40-49) and police districts (Auckland and Canterbury). The reduction in offences between 2019 and 2021 can largely be attributed to the Covid-19 pandemic. During this period, lockdowns and travel restrictions were enforced, leading to fewer cars being parked in public spaces as people stayed home. With vehicles kept in secured locations, such as garages or driveways, opportunities for motor vehicle theft and related offences were significantly reduced. However, the rise in offences from 2021 to 2023 can be explained by the easing of restrictions and the return to normal activities. This led to greater mobility and more vehicles being parked in public spaces, providing more opportunities for theft. Additionally, post-pandemic economic challenges, including rising unemployment and inflation, have further strained communities financially, contributing to the resurgence of motor vehicle theft and related offences.  
+
+*Recommendations*  
+The 10-19 age group and the Counties Manukau police district have been identified as having a high prevalence of motor vehicle theft and related offences. To address this issue, targeted prevention programs should be implemented. For the 10-19 age group, the government should invest in and develop after-school programs, sports and recreational activities to divert them from engaging in criminal behavior. Additionally, job training and vocational programs should be offered for young people struggling in traditional educational settings. By equipping them with job-related skills and increasing their employment opportunities, it will ease their financial stress and decrease the likelihood of engaging in motor vehicle theft and related offences. To address the high offender count of motor vehicle theft and related offences in Counties Manukau district, the government should allocate police resources more effectively by increasing police patrols in high-risk areas and utilizing data analytics to identify specific hotspot within the district. By focusing efforts on these areas, law enforcement can significantly improve the chances of apprehending offenders. Additionally, collaborating with the local council to raise public awareness about the importance of anti-theft devices, such as GPS trackers, immobilizers and alarm systems, and potentially subsidizing these technologies for residents in high-theft area could further reduce the motor vehicle theft and related offences.  Finally, given the general trend of increased motor vehicle theft and related offences following the Covid-19 pandemic, likely driven by inflation and unemployment, the government should also strengthen welfare programs, such as unemployment benefits, housing support and food assistance. This will ease the economic pressures that may drive individuals toward criminal activity, thereby reducing the likelihood of motor vehicle theft and related offences. 
+
+
+
+## References
+New Zealand Police. (2024). *Unique Offenders (demographics)* [Dataset]. Retrieved September 10, 2024, from https://www.police.govt.nz/about-us/publications-statistics/data-and-statistics/policedatanz/unique-offenders-demographics 
+
+RNZ. (2024, June 27). *Car thefts, online fraud sharply on the rise – Ministry of Justice survey.* https://www.rnz.co.nz/news/national/520681/car-thefts-online-fraud-sharply-on-the-rise-ministry-of-justice-survey  
+
+The Post. (2023, December 9). *Vehicle stolen? Good luck getting it back.* https://www.thepost.co.nz/nz-news/350110984/vehicle-stolen-good-luck-getting-it-back
+
+
+
+## Appendix
+```{r Creating the two-way table1, echo=FALSE}
+vehicle_theft_table1 <- xtabs(total_offender_count ~ age_group_combined + year, 
+                              data = vehicle_theft_year_age)
+
+kable(vehicle_theft_table1, format = 'markdown', padding = -5L, 
+      caption = "Total Offenders Involved in Motor Vehicle Theft and 
+      Related offences by Age Group and Year")
+```
+
+
+```{r Creating the two-way table2, echo=FALSE}
+vehicle_theft_table2 <- xtabs(total_offender_count ~ police_district + year, 
+                             data = vehicle_theft_year_district)
+
+kable(vehicle_theft_table2, format = 'markdown', padding = -5L, 
+      caption = "Total Offenders Involved in Motor Vehicle Theft and 
+      Related offences by Police District and Year")
+```
+
+
+
