@@ -7,6 +7,10 @@ This project analyzes motor vehicle theft and related offences in New Zealand, e
 - R
 - R Markdown
 
+## Data Source
+New Zealand Police (2024). *Unique Offenders (Demographics)* dataset.  
+Retrieved from:  https://www.police.govt.nz/about-us/publications-statistics/data-and-statistics/policedatanz/unique-offenders-demographics
+
 ## Steps to Run the Project
 1. Download the dataset files (2019–2023) from the `datasets` folder.
 2. Download the R Markdown script from the `script` folder.
